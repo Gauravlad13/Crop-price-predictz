@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 const cors = require('cors');
 const apiRoutes = require('./routes');
 
@@ -18,7 +19,13 @@ app.use('/api', apiRoutes);
 
 // Serve static files from the frontend dist directory
 const frontendPath = path.join(__dirname, '../frontend/dist');
-app.use(express.static(frontendPath));
+const frontendExists = fs.existsSync(frontendPath);
+
+if (frontendExists) {
+  app.use(express.static(frontendPath));
+} else {
+  console.warn(`Frontend dist folder not found at: ${frontendPath}`);
+}
 
 // SPA fallback - route all unmatched requests to index.html for React Router
 app.get('*', (req, res) => {
@@ -28,7 +35,16 @@ app.get('*', (req, res) => {
   }
   
   // Serve index.html for all other routes (SPA)
-  res.sendFile(path.join(frontendPath, 'index.html'));
+  const indexPath = path.join(frontendPath, 'index.html');
+  
+  if (frontendExists && fs.existsSync(indexPath)) {
+    res.sendFile(indexPath);
+  } else {
+    res.status(200).json({ 
+      message: 'Agropredict API is running',
+      frontend: frontendExists ? 'loaded' : 'not found - access /api/health for API status'
+    });
+  }
 });
 
 // Error handling middleware
@@ -43,7 +59,8 @@ app.use((err, req, res, next) => {
 // Start server
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-  console.log(`Frontend path: ${frontendPath}`);
-  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`✓ Server running on port ${port}`);
+  console.log(`✓ Frontend path: ${frontendPath}`);
+  console.log(`✓ Frontend status: ${frontendExists ? 'loaded' : 'not found'}`);
+  console.log(`✓ Environment: ${process.env.NODE_ENV || 'development'}`);
 });
