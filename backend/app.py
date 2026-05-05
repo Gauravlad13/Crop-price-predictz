@@ -496,4 +496,5 @@ load_resources()
 init_database()
 
 if __name__ == "__main__":
+    print("Backend server is starting...")
     app.run(port=5000, debug=True)
