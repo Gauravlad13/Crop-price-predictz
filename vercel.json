@@ -1,12 +1,13 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
+  "buildCommand": "npm run build",
   "builds": [
     {
       "src": "backend/server.js",
       "use": "@vercel/node",
       "config": {
-        "includeFiles": "frontend/dist/**",
-        "excludeFiles": "frontend/{src,node_modules}/**"
+        "includeFiles": ["frontend/dist/**", "backend/data/crop_data.csv"]
       }
     }
   ],
